@@ -37,39 +37,41 @@ export const getPosts = async () => {
   return result.postsConnection.edges
 }
 
+//No se va a necesitar postsConnection {
+// edges {
+// node { por que es uno solo
 export const getPostDetails = async (slug) => {
   const query = gql`
     query GetPostDetails($slug: String!) {
-      postsConnection {
-        edges {
-          node {
-            author {
-              bio
-              id
-              name
-              photo {
-                url
-              }
-            }
-            createdAt
-            slug
-            title
-            excerpt
-            featuredImage {
-              url
-            }
-            categories {
-              name
-              slug
-            }
+      post(where: { slug: $slug }) {
+        title
+        excerpt
+        featuredImage {
+          url
+        }
+        author {
+          name
+          bio
+          photo {
+            url
           }
+        }
+        createdAt
+        slug
+        content {
+          raw
+        }
+        categories {
+          name
+          slug
         }
       }
     }
   `
-  const result = await request(graphqlAPI, query)
 
-  return result.postsConnection.edges
+  const result = await request(graphqlAPI, query, { slug })
+
+  return result.post
 }
 
 export const getRecentPosts = async () => {
@@ -93,7 +95,7 @@ export const getRecentPosts = async () => {
   return result.posts
 }
 
-export const getSimilarPosts = async () => {
+export const getSimilarPosts = async (categories, slug) => {
   const query = gql`
     query GetPostDetails($slug: String!, $categories: [String!]) {
       posts(
@@ -112,7 +114,7 @@ export const getSimilarPosts = async () => {
       }
     }
   `
-  const result = await request(graphqlAPI, query)
+  const result = await request(graphqlAPI, query, { categories, slug })
 
   return result.posts
 }

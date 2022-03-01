@@ -1,30 +1,33 @@
 import React from 'react'
 
-import { getPosts, getPosDetails } from '../../services'
+import { getPosts, getPostDetails } from '../../services'
 import {
   PostDetail,
   Categories,
   PostWidget,
-  Autor,
+  Author,
   Comments,
   CommentsForm,
-  Author,
 } from '../../components'
 
-const PostDetails = () => {
+const PostDetails = ({ post }) => {
+  console.log(post)
   return (
     <div className="container mx-auto mb-8 px-10">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
         <div className="col-span-1 lg:col-span-8">
-          <PostDetail />
-          <Author />
-          <CommentsForm />
-          <Comments />
+          <PostDetail post={post} />
+          <Author author={post.author} />
+          <CommentsForm slug={post.slug} />
+          <Comments slug={post.slug} />
         </div>
         <div className="col-span-1 lg:col-span-4">
           <div className="relative top-8 lg:sticky">
-            <PostWidget />
-            <Categories />
+            <PostWidget
+              slug={post.slug}
+              categories={post.categories.map((category) => category.slug)}
+            />
+            <Categories slug={post.slug} />
           </div>
         </div>
       </div>
@@ -35,8 +38,16 @@ const PostDetails = () => {
 export default PostDetails
 
 export async function getStaticProps({ params }) {
-  const posts = (await getPosts()) || []
-  // By returning { props: { posts } }, the Blog component
-  // will receive `posts` as a prop at build time
-  return { props: { posts } }
+  const data = await getPostDetails(params.slug)
+  return { props: { post: data } }
+}
+
+// Specify dynamic routes to pre-render pages based on data.
+// The HTML is generated at build time and will be reused on each request.
+export async function getStaticPaths() {
+  const posts = await getPosts()
+  return {
+    paths: posts.map(({ node: { slug } }) => ({ params: { slug } })),
+    fallback: false,
+  }
 }
