@@ -132,3 +132,19 @@ export const getCategories = async () => {
 
   return result.categories
 }
+
+//Fijate que es este caso(hacer un post con formulario)
+//no va a usa graphQL
+//Se envia a la Api de nextJS y no al cms por que
+//tu como admin deberias aprovarlo primero
+//ya en el cms board
+export const submitComment = async (obj) => {
+  const result = await fetch('/api/comments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(obj),
+  })
+  return result.json()
+}
